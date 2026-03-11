@@ -26,6 +26,12 @@ int main(int argc, char* argv[])
     int start_node;
     in >> start_node;
     
+    if (in.eof())
+    {
+        printf("The file contains invalid data (declared number of stations/tracks is greater than the actual number of entries).\n");
+        return 0;
+    }
+    
     railroad.analyze_cargo(start_node);
     railroad.print_all_possible_cargo();
     

@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <iterator>
+#include <stdexcept>
 
 Graph::Node::Node(const int cargo_unload, const int cargo_load):    cargo_unload_(cargo_unload),
                                                                     cargo_load_(cargo_load)
@@ -91,6 +92,16 @@ void Graph::add_node(const int id, const int cargo_unload, const int cargo_load)
 
 void Graph::add_edge(const int from, const int to)
 {
+    if (!node_map_.count(from))
+    {
+        printf("The station [%d] does not exist so a track cannot be added.", from);
+        throw std::invalid_argument("Invalid 'from' station");
+    }
+    if (!node_map_.count(to))
+    {
+        printf("The station [%d] does not exist so a track cannot be added.", to);
+        throw std::invalid_argument("Invalid 'to' station");
+    }
     node_map_[from]->add_edge(node_map_[to]);
 }
 
@@ -106,6 +117,11 @@ void Graph::print_all_possible_cargo() const
 
 void Graph::analyze_cargo(const int start_node)
 {
+    if (!node_map_.count(start_node))
+    {
+        printf("The station [%d] does not exist so it cannot be a starting station.", start_node);
+        throw std::invalid_argument("Invalid starting station");
+    }
     Node* node = node_map_[start_node];
     
     node->visit();
