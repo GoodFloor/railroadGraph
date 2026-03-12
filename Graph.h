@@ -35,8 +35,26 @@ class Graph
     std::unordered_set<Node*> to_be_visited_;
     void analyze_station(Node* node);
 public:
+    /**
+     * Adds a station to the railroad
+     * @param id id of a station
+     * @param cargo_unload type of cargo that is unloaded at the station
+     * @param cargo_load type of cargo that is loaded at the station
+     */
     void add_node(const int id, const int cargo_unload, const int cargo_load);
+    /**
+     * Adds a directed track between two stations
+     * @param from starting station
+     * @param to ending station
+     */
     void add_edge(const int from, const int to);
+    /**
+     * Prints all the stations and cargo types possible for them in a formatted way
+     */
     void print_all_possible_cargo() const;
+    /**
+     * Begins analyzing possible cargo for the stations
+     * @param start_node starting station for all trains
+     */
     void analyze_cargo(const int start_node);
 };
