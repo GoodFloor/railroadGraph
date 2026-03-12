@@ -1,6 +1,7 @@
 #pragma once
 #include <map>
 #include <set>
+#include <unordered_set>
 #include <vector>
 
 class Graph
@@ -12,6 +13,7 @@ class Graph
     private:
         std::set<int> possible_cargo_;
         std::vector<Node*> edges_;
+        std::vector<Node*> changed_predecessors_;
         int cargo_unload_;
         int cargo_load_;
         bool visited_;
@@ -25,9 +27,13 @@ class Graph
         void visit();
         void print_possible_cargo() const;
         int get_unloaded_cargo() const;
+        void changed_predecessor(Node* predecessor);
+        std::vector<Node*> get_changed_predecessors();
+        void clear_changed_predecessors();
     };
     std::map<int, Node*> node_map_;
-    static void analyze_station(Node* node, Node* predecessor);
+    std::unordered_set<Node*> to_be_visited_;
+    void analyze_station(Node* node);
 public:
     void add_node(const int id, const int cargo_unload, const int cargo_load);
     void add_edge(const int from, const int to);

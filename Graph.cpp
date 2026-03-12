@@ -33,6 +33,21 @@ int Graph::Node::get_unloaded_cargo() const
     return cargo_unload_;
 }
 
+void Graph::Node::changed_predecessor(Node* predecessor)
+{
+    changed_predecessors_.push_back(predecessor);
+}
+
+std::vector<Graph::Node*> Graph::Node::get_changed_predecessors()
+{
+    return changed_predecessors_;
+}
+
+void Graph::Node::clear_changed_predecessors()
+{
+    changed_predecessors_.clear();
+}
+
 std::set<int> Graph::Node::get_possible_cargo()
 {
     return possible_cargo_;
@@ -63,12 +78,19 @@ void Graph::Node::visit()
     visited_ = true;
 }
 
-void Graph::analyze_station(Node* node, Node* predecessor)
+void Graph::analyze_station(Node* node)
 {
-    std::set<int> incoming_cargo =  predecessor->get_possible_cargo();
-    std::set<int> current_cargo =  node->get_possible_cargo();
-    incoming_cargo.erase(predecessor->get_unloaded_cargo());
-    incoming_cargo.insert(predecessor->get_loaded_cargo());
+    std::set<int> current_cargo = node->get_possible_cargo();
+    std::set<int> incoming_cargo;
+    for (const auto predecessor : node->get_changed_predecessors())
+    {
+        std::set<int> predecessor_cargo = predecessor->get_possible_cargo();
+        predecessor_cargo.erase(predecessor->get_unloaded_cargo());
+        predecessor_cargo.insert(predecessor->get_loaded_cargo());
+        incoming_cargo.insert(predecessor_cargo.begin(), predecessor_cargo.end());
+    }
+    node->clear_changed_predecessors();
+    
     std::vector<int> difference;
     std::set_difference(incoming_cargo.begin(), incoming_cargo.end(), current_cargo.begin(), current_cargo.end(), std::back_inserter(difference));
     if (difference.empty() && node->was_visited())
@@ -79,9 +101,10 @@ void Graph::analyze_station(Node* node, Node* predecessor)
     {
         node->add_possible_cargo(cargo);
     }
-    for (const auto edge : node->get_edges())
+    for (const auto successor : node->get_edges())
     {
-        analyze_station(edge, node);
+        to_be_visited_.insert(successor);
+        successor->changed_predecessor(node);
     }
 }
 
@@ -122,12 +145,21 @@ void Graph::analyze_cargo(const int start_node)
         printf("The station [%d] does not exist so it cannot be a starting station.", start_node);
         throw std::invalid_argument("Invalid starting station");
     }
-    Node* node = node_map_[start_node];
+    Node* current_node = node_map_[start_node];
+    to_be_visited_.insert(current_node);
     
-    node->visit();
-    for (const auto next_node : node->get_edges())
+    current_node->visit();
+    for (const auto successor : current_node->get_edges())
     {
-        analyze_station(next_node, node);
+        to_be_visited_.insert(successor);
+        successor->changed_predecessor(current_node);
+    }
+    while (!to_be_visited_.empty())
+    {
+        auto next_node_it = to_be_visited_.begin();
+        Node* next_node = *next_node_it;
+        analyze_station(next_node);
+        to_be_visited_.erase(next_node_it);
     }
 }
 
