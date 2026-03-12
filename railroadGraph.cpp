@@ -5,9 +5,20 @@
 
 int main(int argc, char* argv[])
 {
+    if (argc != 2)
+    {
+        printf("Usage: railroad_graph.exe <file>\n");
+        return 2;
+    }
     // Read data from file
     Graph railroad;
-    std::ifstream in("Input1.txt");
+    std::ifstream in(argv[1]);
+    if (!in.is_open())
+    {
+        printf("Unable to open file %s\n", argv[1]);
+        return 1;
+    }
+    printf("Reading from file %s\n", argv[1]);
     int num_nodes;
     int num_edges;
     in >> num_nodes >> num_edges;
@@ -29,7 +40,7 @@ int main(int argc, char* argv[])
     if (in.eof())
     {
         printf("The file contains invalid data (declared number of stations/tracks is greater than the actual number of entries).\n");
-        return 0;
+        return 4;
     }
     
     railroad.analyze_cargo(start_node);
